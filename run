@@ -85,4 +85,4 @@ def app_js():
     return redirect(url_for('static', filename='js/app.js'))
 
 if __name__ == "__main__":
-    app.run(debug=True, threaded=True)
+    app.run(debug=True, threaded=True, port=9779)
