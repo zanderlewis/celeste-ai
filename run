@@ -1,18 +1,29 @@
+#!/usr/bin/env python3
 from flask import Flask, request, jsonify, render_template, Response, redirect, url_for
 import ollama
 import json
 import markup
+import os
 
+app = Flask(__name__)
 
 ai_content = ""
-
-model = "llama3"
+model = "dolphin-llama3"
 history = [
     {"role": "system", "content": ai_content},
 ]
 
-app = Flask(__name__)
+def load_chat_history(unique_id):
+    try:
+        with open(f"chat_history/{unique_id}.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return [{"role": "system", "content": ai_content}]
 
+def save_chat_history(unique_id, history):
+    os.makedirs("chat_history", exist_ok=True)
+    with open(f"chat_history/{unique_id}.json", "w") as f:
+        json.dump(history, f)
 
 @app.route("/")
 def index():
@@ -26,18 +37,21 @@ def chat(unique_id):
     characters = json.load(open("characters.json"))
     ai = next((character for character in characters if character["unique_id"] == unique_id), None)
     if ai:
+        global history
+        history = load_chat_history(unique_id)
         ai_content = ai["description"]
         history[0]["content"] = ai_content
         name = ai["name"]
-        return render_template("chat.html", history=history, name=name)
+        previous_chats = [{"unique_id": c["unique_id"], "name": c["name"]} for c in characters]
+        return render_template("chat.html", history=history, name=name, previous_chats=previous_chats)
     else:
         return "Character not found", 404
-
 
 @app.route("/send", methods=["POST"])
 def send():
     message = {"role": "user", "content": request.json["message"]}
     history.append(message)
+    unique_id = request.args.get("unique_id")
 
     def generate():
         full_response = ""
@@ -45,23 +59,20 @@ def send():
         for response in ollama.chat(model=model, messages=history, stream=True):
             chunk = response["message"]["content"]
             buffer += chunk
-
             # Check if buffer contains an even number of '*'
             if buffer.count('*') % 2 == 0:
                 full_response += buffer
                 buffer = markup.markup(buffer)
                 yield buffer
                 buffer = ""
-
         full_response += buffer
         yield buffer
-
         full_response = markup.markup(full_response)
         m = {"role": "assistant", "content": full_response}
         history.append(m)
+        save_chat_history(unique_id, history)
 
     return Response(generate(), mimetype="text/event-stream")
-
 
 @app.route("/history", methods=["GET"])
 def get_history():
@@ -72,18 +83,6 @@ def get_history():
 @app.route("/chat/static/js/app.js")
 def app_js():
     return redirect(url_for('static', filename='js/app.js'))
-
-@app.route("/print_history")
-def print_history():
-    print(json.dumps(history, indent=2))
-    return "History printed in console"
-
-@app.route("/markup", methods=["POST"])
-def markup_text():
-    text = request.json["text"]
-    m = markup.markup(text)
-    print(m)
-    return jsonify({"markup": m})
 
 if __name__ == "__main__":
     app.run(debug=True, threaded=True)

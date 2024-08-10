@@ -9,8 +9,14 @@ def markup(text):
     text = re.sub(r'\*\*\*(.*?)\*\*\*', r'<b><i>\1</i></b>', text)
     # Bold
     text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
+    text = re.sub(r'\*\*(.*?) \*\*', r'<b>\1</b>', text)
+    text = re.sub(r'\*\* (.*?)\*\*', r'<b>\1</b>', text)
+    text = re.sub(r'\*\* (.*?) \*\*', r'<b>\1</b>', text)
     # Italic
     text = re.sub(r'\*(.*?)\*', r'<i>\1</i>', text)
+    text = re.sub(r'\* (.*?)\*', r'<i>\1</i>', text)
+    text = re.sub(r'\* (.*?) \*', r'<i>\1</i>', text)
+    text = re.sub(r'\* (.*?)\*', r'<i>\1</i>', text)
     return text
 
 # Test the function

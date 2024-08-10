@@ -56,8 +56,8 @@ chatForm.addEventListener('submit', async (e) => {
     const d = await r.json();
     userMessage.innerHTML = d.markup;
 
-    // Send message to backend and handle streaming response
-    const response = await fetch('/send', {
+    // Send the message to the backend
+    const response = await fetch(`/send?unique_id=${uniqueId}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
