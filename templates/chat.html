@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with {{ name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .chat-history {
+            flex-grow: 1;
+            overflow-y: scroll;
+        }
+
+        .chat-form {
+            display: flex;
+        }
+
+        b {
+            font-weight: 900;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-700">
+    <div class="container mx-auto p-4 chat-container">
+        <h1 class="text-2xl font-bold mb-4 text-gray-300">{{ name }}</h1>
+        <div id="chat-history" class="bg-gray-800 p-4 rounded shadow mb-4 chat-history">
+            <!-- Chat messages will be appended here -->
+        </div>
+        <form id="chat-form" class="chat-form">
+            <input id="message-input" type="text" class="flex-grow p-2 border rounded-l bg-gray-800 text-gray-300"
+                placeholder="Type your message...">
+            <button type="submit" class="bg-blue-500 text-white p-2 rounded-r">Send</button>
+        </form>
+    </div>
+    <script src="static/js/app.js"></script>
+</body>
+
+</html>
